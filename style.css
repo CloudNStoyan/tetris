@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@700&display=swap');
+
+#root {
+    position: relative;
+    width: fit-content;
+}
+
+.ui.hide {
+    max-height: 0;
+}
+
+.ui {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    align-items: center;
+    display: flex;
+    flex-flow: row nowrap;
+    max-height: 600px;
+    transition: max-height 0.25s linear;
+}
+
+.overlay {
+    position: absolute;
+    background-color: white;
+    opacity: 0.7;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.play-again {
+    display: block;
+    text-align: center;
+    margin: 0 auto;
+    padding: 5px 10px;
+    background-color: white;
+    z-index: 2;
+    border: 1px solid lightgray;
+    border-radius: 6px;
+    box-shadow: 0 0.125rem 0.25rem rgb(0 0 0 / 8%);
+    text-decoration: none;
+    color: #333;
+    font-size: 24px;
+    transform: scale(0.8);
+    transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94) opacity 0.25s linear;
+    font-family: 'Balsamiq Sans', cursive;
+    opacity: 1;
+}
+
+.ui.hide .play-again {
+    opacity: 0;
+}
+
+.play-again:hover {
+    transform: scale(1);
+}
