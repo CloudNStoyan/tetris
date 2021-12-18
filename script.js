@@ -357,28 +357,13 @@ function randomIntFromInterval(min, max) { // min and max included
 const canvas = document.getElementById('mainCanvas');
 const context = canvas.getContext('2d');
 
-context.fillStyle = "#333";
-context.fillRect(0, 0, 400, 600);
-
-let interval;
-
-const controllerMap = {
-    "left": ['KeyA', 'ArrowLeft'],
-    "right": ['KeyD', 'ArrowRight'],
-    "rotateClockWise": ['KeyR'],
-    "rotateCounterClockWise": ['KeyQ'],
-    "drop": ['Space']
-}
-
 const uiContainer = document.querySelector('.ui');
-
 const uiPlayAgain = uiContainer.querySelector('.play-again');
 
-uiPlayAgain.addEventListener('click', () => {
-    if (interval != null) {
-        return;
-    }
+let interval;
+let gameState;
 
+function initGameState() {
     gameState = new GameState();
     uiContainer.classList.add('hide');
     interval = setInterval(function () {
@@ -390,47 +375,49 @@ uiPlayAgain.addEventListener('click', () => {
         interval = null;
         uiContainer.classList.remove('hide');
     }
-})
-
-let gameState = new GameState();
-
-startGame();
-
-function startGame() {
-    gameState.OnGameOver = () => {
-        console.log("game over")
-        clearInterval(interval);
-        interval = null;
-        uiContainer.classList.remove('hide');
-    }
-    interval = setInterval(function () {
-        gameTick(gameState);
-    }, 250)
-
-    document.body.addEventListener('keydown', (e) => {
-        const key = e.code;
-
-        if (controllerMap.left.includes(key)) {
-            gameState.MoveBlockLeft();
-        }
-
-        if (controllerMap.right.includes(key)) {
-            gameState.MoveBlockRight();
-        }
-
-        if (controllerMap.rotateClockWise.includes(key)) {
-            gameState.RotateBlockClockWise();
-        }
-
-        if (controllerMap.rotateCounterClockWise.includes(key)) {
-            gameState.RotateBlockCounterClockWise();
-        }
-
-        if (controllerMap.drop.includes(key)) {
-            gameState.DropBlock();
-        }
-    });
 }
+
+initGameState();
+
+const controllerMap = {
+    "left": ['KeyA', 'ArrowLeft'],
+    "right": ['KeyD', 'ArrowRight'],
+    "rotateClockWise": ['KeyR'],
+    "rotateCounterClockWise": ['KeyQ'],
+    "drop": ['Space']
+}
+
+document.body.addEventListener('keydown', (e) => {
+    const key = e.code;
+
+    if (controllerMap.left.includes(key)) {
+        gameState.MoveBlockLeft();
+    }
+
+    if (controllerMap.right.includes(key)) {
+        gameState.MoveBlockRight();
+    }
+
+    if (controllerMap.rotateClockWise.includes(key)) {
+        gameState.RotateBlockClockWise();
+    }
+
+    if (controllerMap.rotateCounterClockWise.includes(key)) {
+        gameState.RotateBlockCounterClockWise();
+    }
+
+    if (controllerMap.drop.includes(key)) {
+        gameState.DropBlock();
+    }
+});
+
+uiPlayAgain.addEventListener('click', () => {
+    if (interval != null) {
+        return;
+    }
+
+    initGameState();
+})
 
 function gameTick(gameState) {
     context.fillStyle = "#333";
@@ -488,4 +475,3 @@ function DrawCell(row, column, color) {
     context.fillStyle = color;
     context.fillRect(x, y, cell - cellPadding, cell - cellPadding);
 }
-
