@@ -213,6 +213,7 @@ class ZBlock extends Block {
 }
 
 class BlockQueue {
+    OnNewBlock;
     constructor() {
         this.Blocks = [
             new IBlock(),
@@ -239,6 +240,9 @@ class BlockQueue {
             this.NextBlock.Reset();
         } while (block.Id == this.NextBlock.Id);
 
+        if (this.OnNewBlock) {
+            this.OnNewBlock();
+        }
         return block;
     }
 }
@@ -362,19 +366,26 @@ const uiPlayAgain = uiContainer.querySelector('.play-again');
 
 let interval;
 let gameState;
+let skipMoveDown = false;
 
 function initGameState() {
     gameState = new GameState();
     uiContainer.classList.add('hide');
-    interval = setInterval(function () {
-        gameTick(gameState);
-    }, 250)
+
+    gameState.BlockQueue.OnNewBlock = () => {
+        console.log('new block')
+        skipMoveDown = true;
+    }
 
     gameState.OnGameOver = () => {
         clearInterval(interval);
         interval = null;
         uiContainer.classList.remove('hide');
     }
+
+    interval = setInterval(function () {
+        gameTick(gameState);
+    }, 250)
 }
 
 initGameState();
@@ -425,6 +436,11 @@ function gameTick(gameState) {
     DrawGrid(gameState.GameGrid);
     DrawGhostBlock(gameState, gameState.CurrentBlock);
     DrawCurrentBlock(gameState.CurrentBlock);
+
+    if (skipMoveDown) {
+        skipMoveDown = false;
+        return;
+    }
     gameState.MoveBlockDown();
 }
 
@@ -449,7 +465,7 @@ function DrawGhostBlock(gameState, block) {
     const dropDistance = gameState.BlockDropDistance();
 
     block.TilePositions().forEach(pos => {
-        DrawCell(pos.Row + dropDistance, pos.Column, 'gray');
+        DrawCell(pos.Row + dropDistance, pos.Column, 'rgba(255,255,255,0.3)');
     })
 }
 
@@ -457,7 +473,7 @@ function DrawGrid(gameGrid) {
     for (let row = 0; row < gameGrid.Rows; row++) {
         for (let column = 0; column < gameGrid.Columns; column++) {
             if (gameGrid.IsEmpty(row, column)) {
-                DrawCell(row, column, '#231F20');
+                DrawCell(row, column, '#231F20', false);
             } else {
                 const blockId = gameGrid.Grid[row][column];
                 DrawCell(row, column, colorScheme[blockId])
@@ -466,12 +482,33 @@ function DrawGrid(gameGrid) {
     }
 }
 
-function DrawCell(row, column, color) {
+function DrawCell(row, column, color, hasBorder = true) {
     const gridPadding = 5;
-    const cellPadding = 2;
     const cell = 25;
     const x = (column * cell) + gridPadding;
     const y = (row * cell) + gridPadding;
+
+    if (hasBorder) {
+        drawBoxWithBorder(x, y, cell, cell, color);
+        return;
+    }
+
+    drawBox(x, y, cell, cell, color);
+}
+
+function drawBox(x, y, width, height, color) {
     context.fillStyle = color;
-    context.fillRect(x, y, cell - cellPadding, cell - cellPadding);
+    context.fillRect(x, y, width, height);
+}
+
+function drawBoxWithBorder(x, y, width, height, color) {
+    context.fillStyle = color;
+    context.fillRect(x, y, width, height);
+
+    context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    context.fillRect(x, y, width, height);
+
+    const borderThickness = 2;
+    context.fillStyle = color;
+    context.fillRect(x + borderThickness, y + borderThickness, width - (borderThickness * 2), height - (borderThickness * 2));
 }
