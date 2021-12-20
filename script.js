@@ -373,7 +373,6 @@ function initGameState() {
     uiContainer.classList.add('hide');
 
     gameState.BlockQueue.OnNewBlock = () => {
-        console.log('new block')
         skipMoveDown = true;
     }
 
