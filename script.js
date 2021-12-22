@@ -394,7 +394,7 @@ const controllerMap = {
     "right": ['KeyD', 'ArrowRight'],
     "rotateClockWise": ['KeyR'],
     "rotateCounterClockWise": ['KeyQ'],
-    "drop": ['Space']
+    "drop": ['Space', 'ArrowDown', 'KeyS']
 }
 
 document.body.addEventListener('keydown', (e) => {
