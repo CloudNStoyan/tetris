@@ -1,10 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@700&display=swap');
 
-.game-container {
-    position: relative;
+main {
     width: fit-content;
     width: -moz-fit-content;
     margin: 0 auto;
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.game-container {
+    position: relative;
 }
 
 .ui.hide {
@@ -88,6 +93,7 @@ kbd {
 .instruction {
     display: flex;
     flex-flow: row nowrap;
+    margin-right: 20px;
 }
 
 .instruction kbd:last-child {
