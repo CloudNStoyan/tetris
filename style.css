@@ -12,6 +12,20 @@ main {
     position: relative;
 }
 
+.game-container.animate {
+    animation: shake 0.1s;
+}
+
+@keyframes shake {
+    50% {
+        transform: translateY(20px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
 .ui.hide {
     max-height: 0;
 }
@@ -40,7 +54,7 @@ main {
     z-index: 1;
 }
 
-.play-again {
+.btn-play {
     display: block;
     text-align: center;
     margin: 0 auto;
@@ -58,12 +72,12 @@ main {
     opacity: 1;
 }
 
-.ui.hide .play-again {
+.ui.hide .btn-play {
     opacity: 0;
     transform: scale(0);
 }
 
-.play-again:hover {
+.btn-play:hover {
     border-bottom: 5px solid gray;
     border-left: 5px solid lightgray;
     transform: scale(1);

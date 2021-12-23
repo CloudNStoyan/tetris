@@ -362,7 +362,10 @@ const canvas = document.getElementById('mainCanvas');
 const context = canvas.getContext('2d');
 
 const uiContainer = document.querySelector('.ui');
-const uiPlayAgain = uiContainer.querySelector('.play-again');
+const uiPlayBtn = uiContainer.querySelector('.btn-play');
+
+context.fillStyle = "#333";
+context.fillRect(0, 0, canvas.width, canvas.height);
 
 let interval;
 let gameState;
@@ -374,20 +377,23 @@ function initGameState() {
 
     gameState.BlockQueue.OnNewBlock = () => {
         skipMoveDown = true;
+        triggetShake();
     }
 
     gameState.OnGameOver = () => {
         clearInterval(interval);
         interval = null;
         uiContainer.classList.remove('hide');
+
+        if (uiPlayBtn.innerText == 'Play') {
+            uiPlayBtn.innerText = 'Play Again';
+        }
     }
 
     interval = setInterval(function () {
         gameTick(gameState);
     }, 250)
 }
-
-initGameState();
 
 const controllerMap = {
     "left": ['KeyA', 'ArrowLeft'],
@@ -421,7 +427,7 @@ document.body.addEventListener('keydown', (e) => {
     }
 });
 
-uiPlayAgain.addEventListener('click', () => {
+uiPlayBtn.addEventListener('click', () => {
     if (interval != null) {
         return;
     }
@@ -510,4 +516,14 @@ function drawBoxWithBorder(x, y, width, height, color) {
     const borderThickness = 2;
     context.fillStyle = color;
     context.fillRect(x + borderThickness, y + borderThickness, width - (borderThickness * 2), height - (borderThickness * 2));
+}
+
+const gameContainer = document.querySelector('.game-container');
+
+function triggetShake() {
+    gameContainer.classList.add('animate');
+
+    setTimeout(() => {
+        gameContainer.classList.remove('animate');
+    }, 250);
 }
