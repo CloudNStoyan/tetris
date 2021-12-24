@@ -1,4 +1,5 @@
 class GameGrid {
+    RowCleared;
     constructor(rows, columns) {
         this.Rows = rows;
         this.Columns = columns;
@@ -59,10 +60,26 @@ class GameGrid {
             if (this.IsRowFull(row)) {
                 this.ClearRow(row);
                 cleared++;
+                this.RowCleared(row);
             } else if (cleared > 0) {
                 this.MoveRowDown(row, cleared);
             }
         }
+    }
+
+    GetBlockIdOrNull(r, c) {
+        const row = this.Grid[r];
+
+        if (!Array.isArray(row)) {
+            return null;
+        }
+
+        const blockId = this.Grid[r][c];
+        if (!Number.isInteger(blockId)) {
+            return null;
+        }
+
+        return blockId;
     }
 }
 
@@ -370,6 +387,7 @@ context.fillRect(0, 0, canvas.width, canvas.height);
 let interval;
 let gameState;
 let skipMoveDown = false;
+let gamePause = false;
 
 function initGameState() {
     gameState = new GameState();
@@ -377,7 +395,6 @@ function initGameState() {
 
     gameState.BlockQueue.OnNewBlock = () => {
         skipMoveDown = true;
-        triggetShake();
     }
 
     gameState.OnGameOver = () => {
@@ -390,7 +407,17 @@ function initGameState() {
         }
     }
 
+    gameState.GameGrid.RowCleared = (y) => {
+        triggetShake();
+    }
+
     interval = setInterval(function () {
+        if (gamePause == true) {
+            console.log('dwarf');
+            console.log(gameState);
+            clearInterval(interval);
+            return;
+        }
         gameTick(gameState);
     }, 250)
 }
@@ -462,7 +489,7 @@ const colorScheme = {
 function DrawCurrentBlock(block) {
     const positions = block.Tiles[block.RotationState];
     positions.forEach(position => {
-        DrawCell(block.Offset.Row + position.Row, block.Offset.Column + position.Column, colorScheme[block.Id]);
+        DrawCell(block.Offset.Row + position.Row, block.Offset.Column + position.Column, colorScheme[block.Id], true);
     });
 }
 
@@ -478,23 +505,30 @@ function DrawGrid(gameGrid) {
     for (let row = 0; row < gameGrid.Rows; row++) {
         for (let column = 0; column < gameGrid.Columns; column++) {
             if (gameGrid.IsEmpty(row, column)) {
-                DrawCell(row, column, '#231F20', false);
+                DrawCell(row, column, '#263238', false, true);
+
             } else {
                 const blockId = gameGrid.Grid[row][column];
-                DrawCell(row, column, colorScheme[blockId])
+
+                DrawCell(row, column, colorScheme[blockId], true, false);
             }
         }
     }
 }
 
-function DrawCell(row, column, color, hasBorder = true) {
+function DrawCell(row, column, color, hasBorder = false, isEmpty = false) {
     const gridPadding = 5;
     const cell = 25;
     const x = (column * cell) + gridPadding;
     const y = (row * cell) + gridPadding;
 
-    if (hasBorder) {
+    if (hasBorder == true) {
         drawBoxWithBorder(x, y, cell, cell, color);
+        return;
+    }
+
+    if (isEmpty == true) {
+        drawEmptyBox(x, y, cell, cell, color);
         return;
     }
 
@@ -506,16 +540,58 @@ function drawBox(x, y, width, height, color) {
     context.fillRect(x, y, width, height);
 }
 
+function drawEmptyBox(x, y, width, height, color) {
+    context.fillStyle = color;
+    context.fillRect(x, y, 25, 25);
+
+    const newX = (x + (width / 2));
+    const newY = y + (height / 2);
+
+    drawPoint(newX, newY, 3, 'rgba(255,255,255, 0.2)', 'rgba(255,255,255, 0.2)');
+}
+
+function drawPoint(x, y, radius, borderColor, fillColor) {
+    context.strokeStyle = borderColor;
+    context.fillStyle = fillColor;
+    context.beginPath();
+    context.arc(x, y, radius, 0, 2 * Math.PI);
+    context.fill();
+}
+
 function drawBoxWithBorder(x, y, width, height, color) {
     context.fillStyle = color;
     context.fillRect(x, y, width, height);
 
-    context.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    context.fillRect(x, y, width, height);
+    context.strokeStyle = 'white';
 
     const borderThickness = 2;
-    context.fillStyle = color;
-    context.fillRect(x + borderThickness, y + borderThickness, width - (borderThickness * 2), height - (borderThickness * 2));
+
+    for (let i = 0; i < borderThickness; i++) {
+        drawLine(x, y + i, x + width, y + i); // from left to right (top border)
+    }
+
+    for (let i = 0; i < borderThickness; i++) {
+        drawLine(x + i, y, x + i, y + height); // from left to bottom (left border)
+    }
+
+    context.strokeStyle = 'black';
+
+    for (let i = 0; i < borderThickness; i++) {
+        drawLine((x + width) - i, y, (x + width) - i, y + height); // from right to bottom (right border)
+    }
+
+    for (let i = 0; i < borderThickness; i++) {
+        drawLine(x, (y + height) - i, x + width, (y + height) - i); // from bottom to right (bottom border)
+    }
+}
+
+
+function drawLine(fromX, fromY, toX, toY) {
+    context.lineWidth = 1;
+    context.beginPath();
+    context.moveTo(fromX, fromY);
+    context.lineTo(toX, toY);
+    context.stroke();
 }
 
 const gameContainer = document.querySelector('.game-container');
