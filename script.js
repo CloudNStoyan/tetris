@@ -419,7 +419,9 @@ function initGameState() {
             return;
         }
         gameTick(gameState);
-    }, 250)
+    }, 720);
+
+    requestAnimationFrame(() => drawFrame(gameState));
 }
 
 const controllerMap = {
@@ -460,15 +462,18 @@ uiPlayBtn.addEventListener('click', () => {
     }
 
     initGameState();
-})
+});
 
-function gameTick(gameState) {
-    context.fillStyle = "#333";
+function drawFrame(gameState) {
+    context.fillStyle = "#6a6a6a";
     context.fillRect(0, 0, canvas.width, canvas.height);
     DrawGrid(gameState.GameGrid);
     DrawGhostBlock(gameState, gameState.CurrentBlock);
     DrawCurrentBlock(gameState.CurrentBlock);
+    requestAnimationFrame(() => drawFrame(gameState));
+}
 
+function gameTick(gameState) {
     if (skipMoveDown) {
         skipMoveDown = false;
         return;
@@ -502,7 +507,7 @@ function DrawGhostBlock(gameState, block) {
 }
 
 function DrawGrid(gameGrid) {
-    for (let row = 0; row < gameGrid.Rows; row++) {
+    for (let row = 2; row < gameGrid.Rows; row++) {
         for (let column = 0; column < gameGrid.Columns; column++) {
             if (gameGrid.IsEmpty(row, column)) {
                 DrawCell(row, column, '#263238', false, true);
