@@ -8,8 +8,43 @@ main {
     flex-flow: row nowrap;
 }
 
+.container {
+    display: flex;
+    flex-flow: row nowrap;
+    background-color: #6a6a6a;
+}
+
 .game-container {
     position: relative;
+    height: 560px;
+}
+
+.game-ui {
+    padding: 0;
+    width: 0;
+    color: lightgray;
+    transition: width 0.25s linear, padding 0.25s linear, border 0.25s linear;
+    overflow-x: hidden;
+}
+
+.game-ui.show {
+    width: 150px;
+    padding: 0 20px;
+    border-left: 5px solid gray;
+}
+
+.game-ui h2 {
+    border-bottom: 2px solid;
+    white-space: nowrap;
+}
+
+.game-score {
+    display: inline-block;
+    transition: transform 0.15s linear;
+}
+
+.game-score.animate {
+    transform: scale(1.2);
 }
 
 .game-container.animate {
@@ -39,7 +74,7 @@ main {
     align-items: center;
     display: flex;
     flex-flow: row nowrap;
-    max-height: 600px;
+    max-height: 560px;
     transition: max-height 0.25s linear;
 }
 
@@ -54,13 +89,35 @@ main {
     z-index: 1;
 }
 
+.post-game-wrapper {
+    text-align: center;
+    z-index: 2;
+    margin: 0 auto;
+}
+
+.post-game-wrapper>h2 {
+    color: white;
+    background-color: rgba(0, 0, 0, .5);
+    width: fit-content;
+    width: -moz-fit-content;
+    margin: 0 auto;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.post-game-wrapper .hide {
+    display: none;
+}
+
 .btn-play {
+    width: 180px;
     display: block;
     text-align: center;
     margin: 0 auto;
     padding: 5px 10px;
     background-color: white;
-    z-index: 2;
     border-radius: 6px;
     box-shadow: 0 0.125rem 0.25rem rgb(0 0 0 / 8%);
     text-decoration: none;

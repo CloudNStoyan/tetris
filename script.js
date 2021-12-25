@@ -60,10 +60,13 @@ class GameGrid {
             if (this.IsRowFull(row)) {
                 this.ClearRow(row);
                 cleared++;
-                this.RowCleared(row);
             } else if (cleared > 0) {
                 this.MoveRowDown(row, cleared);
             }
+        }
+
+        if (cleared > 0) {
+            this.RowCleared(cleared);
         }
     }
 
@@ -381,6 +384,13 @@ const context = canvas.getContext('2d');
 const uiContainer = document.querySelector('.ui');
 const uiPlayBtn = uiContainer.querySelector('.btn-play');
 
+const gameUi = document.querySelector('.game-ui');
+const gameUiScore = gameUi.querySelector('.game-score');
+
+const postGameWrapper = document.querySelector('.post-game-wrapper')
+const postGameScoreLabel = postGameWrapper.querySelector('h2');
+const postGameScore = postGameWrapper.querySelector('.post-game-score');
+
 context.fillStyle = "#333";
 context.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -388,8 +398,16 @@ let interval;
 let gameState;
 let skipMoveDown = false;
 let gamePause = false;
+let currentScore = 0;
+let lastScore = 0;
 
 function initGameState() {
+    currentScore = 0;
+    lastScore = 0;
+    ClearGameUi();
+    gameUi.classList.add('show');
+    postGameScoreLabel.classList.add('hide');
+
     gameState = new GameState();
     uiContainer.classList.add('hide');
 
@@ -401,14 +419,18 @@ function initGameState() {
         clearInterval(interval);
         interval = null;
         uiContainer.classList.remove('hide');
+        gameUi.classList.remove('show');
+        postGameScore.innerText = currentScore.toString().padStart(6, '0');
+        postGameScoreLabel.classList.remove('hide');
 
         if (uiPlayBtn.innerText == 'Play') {
             uiPlayBtn.innerText = 'Play Again';
         }
     }
 
-    gameState.GameGrid.RowCleared = (y) => {
+    gameState.GameGrid.RowCleared = (clearedRows) => {
         triggetShake();
+        DoScoreCalculations(clearedRows);
     }
 
     interval = setInterval(function () {
@@ -424,12 +446,57 @@ function initGameState() {
     requestAnimationFrame(() => drawFrame(gameState));
 }
 
+let movingFaster = false;
+
+function StartMovingFaster() {
+    if (movingFaster) {
+        return;
+    }
+    movingFaster = true;
+    clearInterval(interval);
+    interval = setInterval(() => gameTick(gameState), 80);
+}
+
+function StopMovingFaster() {
+    clearInterval(interval);
+    interval = setInterval(function () {
+        if (gamePause == true) {
+            console.log('dwarf');
+            console.log(gameState);
+            clearInterval(interval);
+            return;
+        }
+        gameTick(gameState);
+    }, 720);
+    movingFaster = false;
+}
+
+function DoScoreCalculations(clearedRows) {
+    if (clearedRows >= 4) {
+        currentScore += 1200;
+        return;
+    }
+
+    if (clearedRows >= 3) {
+        currentScore += 300;
+        return;
+    }
+
+    if (clearedRows >= 2) {
+        currentScore += 100;
+        return;
+    }
+
+    currentScore += 40;
+}
+
 const controllerMap = {
     "left": ['KeyA', 'ArrowLeft'],
     "right": ['KeyD', 'ArrowRight'],
     "rotateClockWise": ['KeyR'],
     "rotateCounterClockWise": ['KeyQ'],
-    "drop": ['Space', 'ArrowDown', 'KeyS']
+    "drop": ['Space'],
+    "speed": ['ArrowDown', 'KeyS']
 }
 
 document.body.addEventListener('keydown', (e) => {
@@ -454,7 +521,19 @@ document.body.addEventListener('keydown', (e) => {
     if (controllerMap.drop.includes(key)) {
         gameState.DropBlock();
     }
+
+    if (controllerMap.speed.includes(key)) {
+        StartMovingFaster();
+    }
 });
+
+document.body.addEventListener('keyup', (e) => {
+    const key = e.code;
+
+    if (controllerMap.speed.includes(key)) {
+        StopMovingFaster();
+    }
+})
 
 uiPlayBtn.addEventListener('click', () => {
     if (interval != null) {
@@ -470,7 +549,32 @@ function drawFrame(gameState) {
     DrawGrid(gameState.GameGrid);
     DrawGhostBlock(gameState, gameState.CurrentBlock);
     DrawCurrentBlock(gameState.CurrentBlock);
+    UpdateScoreIfNeeded();
     requestAnimationFrame(() => drawFrame(gameState));
+}
+
+function UpdateScoreIfNeeded() {
+    if (lastScore != currentScore) {
+        UpdateScoreWithAnimation(lastScore, currentScore, Math.max(200, 300 - (currentScore - lastScore)));
+        lastScore = currentScore;
+    }
+}
+
+function UpdateScoreWithAnimation(from, to, speed) {
+    gameUiScore.classList.add('animate');
+    const increment = to / speed;
+    if (from < to) {
+        gameUiScore.innerText = Math.floor(from).toString().padStart(6, '0');
+        setTimeout(() => UpdateScoreWithAnimation(from + increment, to, speed), 1);
+        return;
+    }
+
+    gameUiScore.innerText = Math.floor(to).toString().padStart(6, '0');
+    gameUiScore.classList.remove('animate');
+}
+
+function ClearGameUi() {
+    gameUiScore.innerText = '000000';
 }
 
 function gameTick(gameState) {

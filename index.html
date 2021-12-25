@@ -17,22 +17,27 @@
                     <kbd>A</kbd>
                     <kbd>←</kbd>
                 </div>
-                <div class="description">Move bloks to the Left</div>
+                <div class="description">Move blocks to the Left</div>
             </div>
             <div class="instruction">
                 <div class="keybinds">
                     <kbd>D</kbd>
                     <kbd>→</kbd>
                 </div>
-                <div class="description">Move bloks to the Right</div>
+                <div class="description">Move blocks to the Right</div>
             </div>
             <div class="instruction">
                 <div class="keybinds">
                     <kbd>Space</kbd>
+                </div>
+                <div class="description">Instantly place the block</div>
+            </div>
+            <div class="instruction">
+                <div class="keybinds">
                     <kbd>S</kbd>
                     <kbd>↓</kbd>
                 </div>
-                <div class="description">Place the block</div>
+                <div class="description">Speedup dropping down</div>
             </div>
             <div class="instruction">
                 <div class="keybinds">
@@ -47,11 +52,20 @@
                 <div class="description">Rotate Counter Clock Wise</div>
             </div>
         </div>
-        <div class="game-container">
-            <canvas id="mainCanvas" width="260" height="560"></canvas>
-            <div class="ui">
-                <div class="overlay"></div>
-                <a href="#" class="btn-play">Play</a>
+        <div class="container">
+            <div class="game-container">
+                <canvas id="mainCanvas" width="260" height="560"></canvas>
+
+                <div class="ui">
+                    <div class="overlay"></div>
+                    <div class="post-game-wrapper">
+                        <h2 class="hide">Score: <span class="post-game-score"></span></h2>
+                        <a href="#" class="btn-play">Play</a>
+                    </div>
+                </div>
+            </div>
+            <div class="game-ui">
+                <h2>Score: <span class="game-score">000000</span></h2>
             </div>
         </div>
     </main>
