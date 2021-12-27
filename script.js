@@ -3,6 +3,8 @@ const context = canvas.getContext('2d');
 
 const painter = new CanvasPainter(context);
 
+const container = document.querySelector('.container');
+
 const uiContainer = document.querySelector('.ui');
 const uiPlayBtn = uiContainer.querySelector('.btn-play');
 
@@ -12,6 +14,8 @@ const gameUiScore = gameUi.querySelector('.game-score');
 const postGameWrapper = document.querySelector('.post-game-wrapper')
 const postGameScoreLabel = postGameWrapper.querySelector('h2');
 const postGameScore = postGameWrapper.querySelector('.post-game-score');
+
+const instructionsWrapper = document.querySelector('.instructions');
 
 context.fillStyle = "#333";
 context.fillRect(0, 0, canvas.width, canvas.height);
@@ -29,6 +33,8 @@ function initGameState() {
     ClearGameUi();
     gameUi.classList.add('show');
     postGameScoreLabel.classList.add('hide');
+    instructionsWrapper.classList.add('hide');
+    container.classList.add('animate');
 
     gameState = new GameState();
     uiContainer.classList.add('hide');
@@ -44,6 +50,8 @@ function initGameState() {
         gameUi.classList.remove('show');
         postGameScore.innerText = currentScore.toString().padStart(6, '0');
         postGameScoreLabel.classList.remove('hide');
+        instructionsWrapper.classList.remove('hide');
+        container.classList.remove('animate');
 
         if (uiPlayBtn.innerText == 'Play') {
             uiPlayBtn.innerText = 'Play Again';

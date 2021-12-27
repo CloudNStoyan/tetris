@@ -12,6 +12,41 @@ main {
     display: flex;
     flex-flow: row nowrap;
     background-color: #6a6a6a;
+    filter: drop-shadow(2px 4px 6px black);
+}
+
+.container.animate {
+    animation: dancing-shadows 10s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite alternate;
+}
+
+@keyframes dancing-shadows {
+    0% {
+        filter: drop-shadow(1px 0 15px cyan);
+    }
+
+    15% {
+        filter: drop-shadow(0 1px 15px blue);
+    }
+
+    30% {
+        filter: drop-shadow(-1px 0 15px orange);
+    }
+
+    45% {
+        filter: drop-shadow(0 1px 15px yellow);
+    }
+
+    60% {
+        filter: drop-shadow(1px 0 15px lightgreen);
+    }
+
+    75% {
+        filter: drop-shadow(0 1px 15px purple);
+    }
+
+    90% {
+        filter: drop-shadow(-1px 0 15px red);
+    }
 }
 
 .game-container {
@@ -156,9 +191,29 @@ kbd {
 
 .instructions {
     margin: 0 auto;
-    width: fit-content;
-    width: -moz-fit-content;
+    width: 230px;
     text-align: center;
+    overflow: hidden;
+    transition: width 0.25s linear, padding 0.25s linear;
+    white-space: nowrap;
+    height: fit-content;
+    height: -moz-fit-content;
+    padding: 10px 20px;
+    background-color: #c1c1c1;
+    color: white;
+    border: 0;
+    border-bottom-left-radius: 6px;
+    border-top-left-radius: 6px;
+    filter: drop-shadow(2px 4px 6px black);
+}
+
+.instructions h2 {
+    margin: 0;
+}
+
+.instructions.hide {
+    width: 0;
+    padding: 0;
 }
 
 .instruction {
