@@ -20,32 +20,31 @@ const instructionsWrapper = document.querySelector('.instructions');
 context.fillStyle = "#333";
 context.fillRect(0, 0, canvas.width, canvas.height);
 
-let interval;
+let GameTickInterval;
+let GameTickTimeout;
 let gameState;
-let skipMoveDown = false;
-let gamePause = false;
 let currentScore = 0;
 let lastScore = 0;
 
 function initGameState() {
-    currentScore = 0;
-    lastScore = 0;
-    ClearGameUi();
+    ClearGameState();
     gameUi.classList.add('show');
     postGameScoreLabel.classList.add('hide');
     instructionsWrapper.classList.add('hide');
     container.classList.add('animate');
-
-    gameState = new GameState();
     uiContainer.classList.add('hide');
 
     gameState.BlockQueue.OnNewBlock = () => {
-        skipMoveDown = true;
-    }
+        ClearGameTick();
+        clearTimeout(GameTickTimeout);
+        GameTickTimeout = setTimeout(() => {
+            console.log('I HAVE WAITED 2 SECONDS!')
+            SetGameTick(720);
+        }, 2000);
+    };
 
     gameState.OnGameOver = () => {
-        clearInterval(interval);
-        interval = null;
+        ClearGameTick();
         uiContainer.classList.remove('hide');
         gameUi.classList.remove('show');
         postGameScore.innerText = currentScore.toString().padStart(6, '0');
@@ -63,42 +62,33 @@ function initGameState() {
         DoScoreCalculations(clearedRows);
     }
 
-    interval = setInterval(function () {
-        if (gamePause == true) {
-            console.log('dwarf');
-            console.log(gameState);
-            clearInterval(interval);
-            return;
-        }
-        gameTick(gameState);
-    }, 720);
+    SetGameTick(720);
 
     requestAnimationFrame(() => drawFrame(gameState));
 }
 
-let movingFaster = false;
-
-function StartMovingFaster() {
-    if (movingFaster) {
-        return;
-    }
-    movingFaster = true;
-    clearInterval(interval);
-    interval = setInterval(() => gameTick(gameState), 80);
+const ClearGameTick = () => clearInterval(GameTickInterval);
+const SetGameTick = (interval) => {
+    ClearGameTick();
+    GameTickInterval = setInterval(() => gameState.MoveBlockDown(), interval);
 }
 
-function StopMovingFaster() {
-    clearInterval(interval);
-    interval = setInterval(function () {
-        if (gamePause == true) {
-            console.log('dwarf');
-            console.log(gameState);
-            clearInterval(interval);
-            return;
-        }
-        gameTick(gameState);
-    }, 720);
-    movingFaster = false;
+function ClearGameState() {
+    gameUiScore.innerText = '000000';
+    currentScore = 0;
+    lastScore = 0;
+    gameState = new GameState();
+}
+
+function DebugMode() {
+    if (!gameState) {
+        console.log('The game hasn\'t started yet!');
+        return;
+    }
+
+    console.log(gameState);
+    console.log('The game is now in debug mode.')
+    clearInterval(GameTickInterval);
 }
 
 function DoScoreCalculations(clearedRows) {
@@ -120,7 +110,7 @@ function DoScoreCalculations(clearedRows) {
     currentScore += 40;
 }
 
-const controllerMap = {
+const InputMap = {
     "left": ['KeyA', 'ArrowLeft'],
     "right": ['KeyD', 'ArrowRight'],
     "rotateClockWise": ['KeyR'],
@@ -129,44 +119,41 @@ const controllerMap = {
     "speed": ['ArrowDown', 'KeyS']
 }
 
-document.body.addEventListener('keydown', (e) => {
-    const key = e.code;
+function OnInput(key) {
+    // if the game is not currently running we don't need the key inputs
+    if (!gameState) {
+        return;
+    }
 
-    if (controllerMap.left.includes(key)) {
+    if (InputMap.left.includes(key)) {
         gameState.MoveBlockLeft();
     }
 
-    if (controllerMap.right.includes(key)) {
+    if (InputMap.right.includes(key)) {
         gameState.MoveBlockRight();
     }
 
-    if (controllerMap.rotateClockWise.includes(key)) {
+    if (InputMap.rotateClockWise.includes(key)) {
         gameState.RotateBlockClockWise();
     }
 
-    if (controllerMap.rotateCounterClockWise.includes(key)) {
+    if (InputMap.rotateCounterClockWise.includes(key)) {
         gameState.RotateBlockCounterClockWise();
     }
 
-    if (controllerMap.drop.includes(key)) {
+    if (InputMap.drop.includes(key)) {
         gameState.DropBlock();
     }
 
-    if (controllerMap.speed.includes(key)) {
-        StartMovingFaster();
+    if (InputMap.speed.includes(key)) {
+        gameState.MoveBlockDown();
     }
-});
+}
 
-document.body.addEventListener('keyup', (e) => {
-    const key = e.code;
-
-    if (controllerMap.speed.includes(key)) {
-        StopMovingFaster();
-    }
-})
+document.body.addEventListener('keydown', (e) => OnInput(e.code));
 
 uiPlayBtn.addEventListener('click', () => {
-    if (interval != null) {
+    if (gameState && !gameState.GameOver) {
         return;
     }
 
@@ -201,18 +188,6 @@ function UpdateScoreWithAnimation(from, to, speed) {
 
     gameUiScore.innerText = Math.floor(to).toString().padStart(6, '0');
     gameUiScore.classList.remove('animate');
-}
-
-function ClearGameUi() {
-    gameUiScore.innerText = '000000';
-}
-
-function gameTick(gameState) {
-    if (skipMoveDown) {
-        skipMoveDown = false;
-        return;
-    }
-    gameState.MoveBlockDown();
 }
 
 const colorScheme = {
