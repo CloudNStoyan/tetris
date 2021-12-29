@@ -132,7 +132,7 @@ class Block {
 
 class IBlock extends Block {
     constructor() {
-        super(new Position(-1, 3))
+        super(new Position(0, 3))
 
         this.Tiles = [
             [new Position(1, 0), new Position(1, 1), new Position(1, 2), new Position(1, 3)],
@@ -245,7 +245,7 @@ class BlockQueue {
             new ZBlock()
         ]
 
-        this.NextBlock = this.RandomBlock();
+        this.NextBlocks = [this.RandomBlock(), this.RandomBlock(), this.RandomBlock(), this.RandomBlock()];
     }
 
     RandomBlock() {
@@ -253,12 +253,14 @@ class BlockQueue {
     }
 
     GetAndUpdate() {
-        const block = this.NextBlock;
+        const block = this.NextBlocks.shift();
 
+        let newBlock;
         do {
-            this.NextBlock = this.RandomBlock();
-            this.NextBlock.Reset();
-        } while (block.Id == this.NextBlock.Id);
+            newBlock = this.RandomBlock();
+        } while (block.Id == newBlock.Id || this.NextBlocks[this.NextBlocks.length - 1].Id == newBlock.Id);
+
+        this.NextBlocks.push(newBlock);
 
         if (this.OnNewBlock) {
             this.OnNewBlock();
@@ -334,6 +336,7 @@ class GameState {
             this.OnGameOver();
         } else {
             this.CurrentBlock = this.BlockQueue.GetAndUpdate();
+            this.CurrentBlock.Reset();
         }
     }
 
@@ -364,6 +367,26 @@ class GameState {
         });
 
         return drop;
+    }
+
+    HoldBlock() {
+        if (this.CurrentHoldBlock) {
+            const block = this.CurrentBlock;
+
+            this.CurrentBlock = this.CurrentHoldBlock;
+            this.CurrentBlock.Offset.Row = block.Offset.Row;
+            this.CurrentBlock.Offset.Column = block.Offset.Column;
+
+            this.CurrentHoldBlock = block;
+            this.CurrentHoldBlock.Reset();
+            return;
+        }
+
+        this.CurrentHoldBlock = this.CurrentBlock;
+        this.CurrentHoldBlock.Reset();
+
+        this.CurrentBlock = this.BlockQueue.GetAndUpdate();
+        this.CurrentBlock.Reset();
     }
 
     DropBlock() {

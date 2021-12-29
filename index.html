@@ -52,11 +52,22 @@
                 </div>
                 <div class="description">Rotate Counter Clock Wise</div>
             </div>
+            <div class="instruction">
+                <div class="keybinds">
+                    <kbd>C</kbd>
+                </div>
+                <div class="description">Hold a block</div>
+            </div>
         </div>
         <div class="container">
+            <div class="hold-container">
+                <div class="hold-wrapper">
+                    <h2>Hold</h2>
+                    <canvas width="110" height="60" id="hold-canvas"></canvas>
+                </div>
+            </div>
             <div class="game-container">
                 <canvas id="mainCanvas" width="260" height="560"></canvas>
-
                 <div class="ui">
                     <div class="overlay"></div>
                     <div class="post-game-wrapper">
@@ -66,7 +77,11 @@
                 </div>
             </div>
             <div class="game-ui">
-                <h2>Score: <span class="game-score">000000</span></h2>
+                <div class="next-wrapper">
+                    <h2>Next</h2>
+                    <canvas width="110" height="300" id="next-canvas"></canvas>
+                </div>
+                <h2 class="score">Score: <span class="game-score">000000</span></h2>
             </div>
         </div>
     </main>

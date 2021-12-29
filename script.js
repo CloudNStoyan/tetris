@@ -1,7 +1,7 @@
 const canvas = document.getElementById('mainCanvas');
 const context = canvas.getContext('2d');
 
-const painter = new CanvasPainter(context);
+const mainPainter = new CanvasPainter(context);
 
 const container = document.querySelector('.container');
 
@@ -10,6 +10,8 @@ const uiPlayBtn = uiContainer.querySelector('.btn-play');
 
 const gameUi = document.querySelector('.game-ui');
 const gameUiScore = gameUi.querySelector('.game-score');
+
+const holdContainer = document.querySelector('.hold-container');
 
 const postGameWrapper = document.querySelector('.post-game-wrapper')
 const postGameScoreLabel = postGameWrapper.querySelector('h2');
@@ -29,6 +31,7 @@ let lastScore = 0;
 function initGameState() {
     ClearGameState();
     gameUi.classList.add('show');
+    holdContainer.classList.add('show');
     postGameScoreLabel.classList.add('hide');
     instructionsWrapper.classList.add('hide');
     container.classList.add('animate');
@@ -37,16 +40,14 @@ function initGameState() {
     gameState.BlockQueue.OnNewBlock = () => {
         ClearGameTick();
         clearTimeout(GameTickTimeout);
-        GameTickTimeout = setTimeout(() => {
-            console.log('I HAVE WAITED 2 SECONDS!')
-            SetGameTick(720);
-        }, 2000);
+        GameTickTimeout = setTimeout(() => SetGameTick(720), 2000);
     };
 
     gameState.OnGameOver = () => {
         ClearGameTick();
         uiContainer.classList.remove('hide');
         gameUi.classList.remove('show');
+        holdContainer.classList.remove('show');
         postGameScore.innerText = currentScore.toString().padStart(6, '0');
         postGameScoreLabel.classList.remove('hide');
         instructionsWrapper.classList.remove('hide');
@@ -116,7 +117,8 @@ const InputMap = {
     "rotateClockWise": ['KeyR'],
     "rotateCounterClockWise": ['KeyQ'],
     "drop": ['Space'],
-    "speed": ['ArrowDown', 'KeyS']
+    "speed": ['ArrowDown', 'KeyS'],
+    "hold": ['KeyC']
 }
 
 function OnInput(key) {
@@ -148,6 +150,10 @@ function OnInput(key) {
     if (InputMap.speed.includes(key)) {
         gameState.MoveBlockDown();
     }
+
+    if (InputMap.hold.includes(key)) {
+        gameState.HoldBlock();
+    }
 }
 
 document.body.addEventListener('keydown', (e) => OnInput(e.code));
@@ -166,6 +172,8 @@ function drawFrame(gameState) {
     DrawGrid(gameState.GameGrid);
     DrawGhostBlock(gameState, gameState.CurrentBlock);
     DrawCurrentBlock(gameState.CurrentBlock);
+    DrawNextBlocks(gameState);
+    DrawHoldBlock(gameState.CurrentHoldBlock);
     UpdateScoreIfNeeded();
     requestAnimationFrame(() => drawFrame(gameState));
 }
@@ -203,7 +211,7 @@ const colorScheme = {
 function DrawCurrentBlock(block) {
     const positions = block.Tiles[block.RotationState];
     positions.forEach(position => {
-        DrawCell(block.Offset.Row + position.Row, block.Offset.Column + position.Column, colorScheme[block.Id], true);
+        DrawCell(mainPainter, block.Offset.Row + position.Row, block.Offset.Column + position.Column, colorScheme[block.Id], true);
     });
 }
 
@@ -211,7 +219,7 @@ function DrawGhostBlock(gameState, block) {
     const dropDistance = gameState.BlockDropDistance();
 
     block.TilePositions().forEach(pos => {
-        DrawCell(pos.Row + dropDistance, pos.Column, 'rgba(255,255,255,0.3)');
+        DrawCell(mainPainter, pos.Row + dropDistance, pos.Column, 'rgba(255,255,255,0.3)');
     })
 }
 
@@ -219,34 +227,70 @@ function DrawGrid(gameGrid) {
     for (let row = 2; row < gameGrid.Rows; row++) {
         for (let column = 0; column < gameGrid.Columns; column++) {
             if (gameGrid.IsEmpty(row, column)) {
-                DrawCell(row, column, '#263238', false, true);
+                DrawCell(mainPainter, row, column, '#263238', false, true);
 
             } else {
                 const blockId = gameGrid.Grid[row][column];
 
-                DrawCell(row, column, colorScheme[blockId], true, false);
+                DrawCell(mainPainter, row, column, colorScheme[blockId], true, false);
             }
         }
     }
 }
 
-function DrawCell(row, column, color, hasBorder = false, isEmpty = false) {
+function DrawCell(canvasPainter, row, column, color, hasBorder = false, isEmpty = false) {
     const gridPadding = 5;
     const cell = 25;
     const x = (column * cell) + gridPadding;
     const y = (row * cell) + gridPadding;
 
     if (hasBorder == true) {
-        painter.DrawBoxWithBorder(x, y, cell, cell, color);
+        canvasPainter.DrawBoxWithBorder(x, y, cell, cell, color);
         return;
     }
 
     if (isEmpty == true) {
-        painter.DrawEmptyBox(x, y, cell, cell, color);
+        canvasPainter.DrawEmptyBox(x, y, cell, cell, color);
         return;
     }
 
-    painter.DrawBox(x, y, cell, cell, color);
+    canvasPainter.DrawBox(x, y, cell, cell, color);
+}
+
+const nextCanvas = document.querySelector('#next-canvas');
+const nextContext = nextCanvas.getContext('2d');
+const nextPainter = new CanvasPainter(nextContext);
+
+function DrawNextBlocks(gameState) {
+    nextContext.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+    let rowOffset = 0;
+    gameState.BlockQueue.NextBlocks.forEach(nextBlock => {
+        const positions = nextBlock.Tiles[0];
+        const columnOffset = nextBlock.Id != 1 ? 1 : 0;
+        positions.forEach(position => {
+            DrawCell(nextPainter, rowOffset + position.Row, columnOffset + position.Column, colorScheme[nextBlock.Id], true);
+        });
+        rowOffset += 3;
+    })
+}
+
+const holdCanvas = document.querySelector('#hold-canvas');
+const holdContext = holdCanvas.getContext('2d');
+const holdPainter = new CanvasPainter(holdContext);
+
+function DrawHoldBlock(block) {
+    if (!block) {
+        return;
+    }
+
+    holdContext.clearRect(0, 0, holdCanvas.width, holdCanvas.height);
+
+    const positions = block.Tiles[0];
+    const columnOffset = block.Id != 1 ? 1 : 0;
+    positions.forEach(position => {
+        DrawCell(holdPainter, position.Row, columnOffset + position.Column, colorScheme[block.Id], true);
+    });
 }
 
 

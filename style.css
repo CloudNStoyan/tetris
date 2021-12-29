@@ -54,6 +54,38 @@ main {
     height: 560px;
 }
 
+.hold-container {
+    padding: 0;
+    width: 0;
+    transition: width 0.25s linear, padding 0.25s linear;
+}
+
+.hold-container.show {
+    width: 130px;
+    padding: 0 20px;
+    border-right: 5px solid gray;
+}
+
+.hold-wrapper {
+    margin: 0 auto;
+    border: 3px solid lightgray;
+    margin-top: 20px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.hold-wrapper h2 {
+    background-color: lightgray;
+    color: gray;
+    margin: 0;
+    text-align: center;
+}
+
+#hold-canvas {
+    display: block;
+    margin: 0 auto;
+}
+
 .game-ui {
     padding: 0;
     width: 0;
@@ -68,7 +100,7 @@ main {
     border-left: 5px solid gray;
 }
 
-.game-ui h2 {
+.game-ui .score {
     border-bottom: 2px solid;
     white-space: nowrap;
 }
@@ -224,4 +256,24 @@ kbd {
 
 .instruction kbd:last-child {
     margin-right: 5px;
+}
+
+.next-wrapper {
+    margin: 0 auto;
+    border: 3px solid;
+    margin-top: 20px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.next-wrapper h2 {
+    background-color: lightgray;
+    color: gray;
+    margin: 0;
+    text-align: center;
+}
+
+#next-canvas {
+    display: block;
+    margin: 0 auto;
 }
