@@ -1,8 +1,3 @@
-const canvas = document.getElementById('mainCanvas');
-const context = canvas.getContext('2d');
-
-const mainPainter = new CanvasPainter(context);
-
 const container = document.querySelector('.container');
 
 const uiContainer = document.querySelector('.ui');
@@ -19,17 +14,19 @@ const postGameScore = postGameWrapper.querySelector('.post-game-score');
 
 const instructionsWrapper = document.querySelector('.instructions');
 
-context.fillStyle = "#333";
-context.fillRect(0, 0, canvas.width, canvas.height);
+const mainPainter = new CanvasPainter('#main-canvas');
+const nextPainter = new CanvasPainter('#next-canvas');
+const holdPainter = new CanvasPainter('#hold-canvas');
+mainPainter.Fill('#333');
 
 let GameTickInterval;
 let GameTickTimeout;
 let gameState;
-let currentScore = 0;
-let lastScore = 0;
 
 function initGameState() {
-    ClearGameState();
+    gameUiScore.innerText = '000000';
+    gameState = new GameState();
+
     gameUi.classList.add('show');
     holdContainer.classList.add('show');
     postGameScoreLabel.classList.add('hide');
@@ -48,7 +45,7 @@ function initGameState() {
         uiContainer.classList.remove('hide');
         gameUi.classList.remove('show');
         holdContainer.classList.remove('show');
-        postGameScore.innerText = currentScore.toString().padStart(6, '0');
+        postGameScore.innerText = gameState.CurrentScore.toString().padStart(6, '0');
         postGameScoreLabel.classList.remove('hide');
         instructionsWrapper.classList.remove('hide');
         container.classList.remove('animate');
@@ -58,10 +55,7 @@ function initGameState() {
         }
     }
 
-    gameState.GameGrid.RowCleared = (clearedRows) => {
-        triggetShake();
-        DoScoreCalculations(clearedRows);
-    }
+    gameState.GameGrid.RowCleared = (clearedRows) => triggetShake();
 
     SetGameTick(720);
 
@@ -74,11 +68,14 @@ const SetGameTick = (interval) => {
     GameTickInterval = setInterval(() => gameState.MoveBlockDown(), interval);
 }
 
-function ClearGameState() {
-    gameUiScore.innerText = '000000';
-    currentScore = 0;
-    lastScore = 0;
-    gameState = new GameState();
+const gameContainer = document.querySelector('.game-container');
+
+function triggetShake() {
+    gameContainer.classList.add('animate');
+
+    setTimeout(() => {
+        gameContainer.classList.remove('animate');
+    }, 250);
 }
 
 function DebugMode() {
@@ -92,24 +89,7 @@ function DebugMode() {
     clearInterval(GameTickInterval);
 }
 
-function DoScoreCalculations(clearedRows) {
-    if (clearedRows >= 4) {
-        currentScore += 1200;
-        return;
-    }
 
-    if (clearedRows >= 3) {
-        currentScore += 300;
-        return;
-    }
-
-    if (clearedRows >= 2) {
-        currentScore += 100;
-        return;
-    }
-
-    currentScore += 40;
-}
 
 const InputMap = {
     "left": ['KeyA', 'ArrowLeft'],
@@ -167,8 +147,7 @@ uiPlayBtn.addEventListener('click', () => {
 });
 
 function drawFrame(gameState) {
-    context.fillStyle = "#6a6a6a";
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    mainPainter.Fill('#6a6a6a');
     DrawGrid(gameState.GameGrid);
     DrawGhostBlock(gameState, gameState.CurrentBlock);
     DrawCurrentBlock(gameState.CurrentBlock);
@@ -179,9 +158,9 @@ function drawFrame(gameState) {
 }
 
 function UpdateScoreIfNeeded() {
-    if (lastScore != currentScore) {
-        UpdateScoreWithAnimation(lastScore, currentScore, Math.max(200, 300 - (currentScore - lastScore)));
-        lastScore = currentScore;
+    if (gameState.LastScore != gameState.CurrentScore) {
+        UpdateScoreWithAnimation(gameState.LastScore, gameState.CurrentScore, Math.max(200, 300 - (gameState.CurrentScore - gameState.LastScore)));
+        gameState.LastScore = gameState.CurrentScore;
     }
 }
 
@@ -198,7 +177,7 @@ function UpdateScoreWithAnimation(from, to, speed) {
     gameUiScore.classList.remove('animate');
 }
 
-const colorScheme = {
+const ColorScheme = {
     1: 'cyan',
     2: 'blue',
     3: 'orange',
@@ -206,12 +185,12 @@ const colorScheme = {
     5: 'lightgreen',
     6: 'purple',
     7: 'red'
-}
+};
 
 function DrawCurrentBlock(block) {
     const positions = block.Tiles[block.RotationState];
     positions.forEach(position => {
-        DrawCell(mainPainter, block.Offset.Row + position.Row, block.Offset.Column + position.Column, colorScheme[block.Id], true);
+        mainPainter.DrawCell(block.Offset.Row + position.Row, block.Offset.Column + position.Column, ColorScheme[block.Id], true);
     });
 }
 
@@ -219,87 +198,50 @@ function DrawGhostBlock(gameState, block) {
     const dropDistance = gameState.BlockDropDistance();
 
     block.TilePositions().forEach(pos => {
-        DrawCell(mainPainter, pos.Row + dropDistance, pos.Column, 'rgba(255,255,255,0.3)');
-    })
+        mainPainter.DrawCell(pos.Row + dropDistance, pos.Column, 'rgba(255,255,255,0.3)');
+    });
 }
 
 function DrawGrid(gameGrid) {
     for (let row = 2; row < gameGrid.Rows; row++) {
         for (let column = 0; column < gameGrid.Columns; column++) {
             if (gameGrid.IsEmpty(row, column)) {
-                DrawCell(mainPainter, row, column, '#263238', false, true);
+                mainPainter.DrawCell(row, column, '#263238', false, true);
 
             } else {
                 const blockId = gameGrid.Grid[row][column];
 
-                DrawCell(mainPainter, row, column, colorScheme[blockId], true, false);
+                mainPainter.DrawCell(row, column, ColorScheme[blockId], true, false);
             }
         }
     }
 }
 
-function DrawCell(canvasPainter, row, column, color, hasBorder = false, isEmpty = false) {
-    const gridPadding = 5;
-    const cell = 25;
-    const x = (column * cell) + gridPadding;
-    const y = (row * cell) + gridPadding;
-
-    if (hasBorder == true) {
-        canvasPainter.DrawBoxWithBorder(x, y, cell, cell, color);
-        return;
-    }
-
-    if (isEmpty == true) {
-        canvasPainter.DrawEmptyBox(x, y, cell, cell, color);
-        return;
-    }
-
-    canvasPainter.DrawBox(x, y, cell, cell, color);
-}
-
-const nextCanvas = document.querySelector('#next-canvas');
-const nextContext = nextCanvas.getContext('2d');
-const nextPainter = new CanvasPainter(nextContext);
-
 function DrawNextBlocks(gameState) {
-    nextContext.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+    nextPainter.Clear();
 
     let rowOffset = 0;
     gameState.BlockQueue.NextBlocks.forEach(nextBlock => {
         const positions = nextBlock.Tiles[0];
         const columnOffset = nextBlock.Id != 1 ? 1 : 0;
         positions.forEach(position => {
-            DrawCell(nextPainter, rowOffset + position.Row, columnOffset + position.Column, colorScheme[nextBlock.Id], true);
+            nextPainter.DrawCell(rowOffset + position.Row, columnOffset + position.Column, ColorScheme[nextBlock.Id], true);
         });
         rowOffset += 3;
     })
 }
 
-const holdCanvas = document.querySelector('#hold-canvas');
-const holdContext = holdCanvas.getContext('2d');
-const holdPainter = new CanvasPainter(holdContext);
-
 function DrawHoldBlock(block) {
     if (!block) {
+        holdPainter.Clear();
         return;
     }
 
-    holdContext.clearRect(0, 0, holdCanvas.width, holdCanvas.height);
+    holdPainter.Clear();
 
     const positions = block.Tiles[0];
     const columnOffset = block.Id != 1 ? 1 : 0;
     positions.forEach(position => {
-        DrawCell(holdPainter, position.Row, columnOffset + position.Column, colorScheme[block.Id], true);
+        holdPainter.DrawCell(position.Row, columnOffset + position.Column, ColorScheme[block.Id], true);
     });
-}
-
-
-const gameContainer = document.querySelector('.game-container');
-
-function triggetShake() {
-    gameContainer.classList.add('animate');
-
-    setTimeout(() => {
-        gameContainer.classList.remove('animate');
-    }, 250);
 }

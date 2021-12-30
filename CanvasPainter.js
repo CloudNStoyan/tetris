@@ -1,6 +1,16 @@
 class CanvasPainter {
-    constructor(canvasContext) {
-        this.Context = canvasContext;
+    constructor(canvasSelector) {
+        this.Canvas = document.querySelector(canvasSelector);
+        this.Context = this.Canvas.getContext('2d');
+    }
+
+    Fill(color) {
+        this.Context.fillStyle = color;
+        this.Context.fillRect(0, 0, this.Canvas.width, this.Canvas.height);
+    }
+
+    Clear() {
+        this.Context.clearRect(0, 0, this.Canvas.width, this.Canvas.height);
     }
 
     DrawBox(x, y, width, height, color) {
@@ -59,5 +69,24 @@ class CanvasPainter {
         this.Context.moveTo(fromX, fromY);
         this.Context.lineTo(toX, toY);
         this.Context.stroke();
+    }
+
+    DrawCell(row, column, color, hasBorder = false, isEmpty = false) {
+        const gridPadding = 5;
+        const cell = 25;
+        const x = (column * cell) + gridPadding;
+        const y = (row * cell) + gridPadding;
+
+        if (hasBorder == true) {
+            this.DrawBoxWithBorder(x, y, cell, cell, color);
+            return;
+        }
+
+        if (isEmpty == true) {
+            this.DrawEmptyBox(x, y, cell, cell, color);
+            return;
+        }
+
+        this.DrawBox(x, y, cell, cell, color);
     }
 }

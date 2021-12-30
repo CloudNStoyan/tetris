@@ -1,5 +1,6 @@
 class GameGrid {
     RowCleared;
+    UpdateScore;
     constructor(rows, columns) {
         this.Rows = rows;
         this.Columns = columns;
@@ -67,6 +68,7 @@ class GameGrid {
 
         if (cleared > 0) {
             this.RowCleared(cleared);
+            this.UpdateScore(cleared);
         }
     }
 
@@ -276,6 +278,10 @@ class GameState {
         this.BlockQueue = new BlockQueue();
         this.CurrentBlock = this.BlockQueue.GetAndUpdate();
         this.GameOver = false;
+        this.CurrentScore = 0;
+        this.LastScore = 0;
+
+        this.GameGrid.UpdateScore = (clearedRows) => this.DoScoreCalculations(clearedRows);
     }
 
     BlockFits() {
@@ -392,6 +398,25 @@ class GameState {
     DropBlock() {
         this.CurrentBlock.Move(this.BlockDropDistance(), 0);
         this.PlaceBlock();
+    }
+
+    DoScoreCalculations(clearedRows) {
+        if (clearedRows >= 4) {
+            this.CurrentScore += 1200;
+            return;
+        }
+
+        if (clearedRows >= 3) {
+            this.CurrentScore += 300;
+            return;
+        }
+
+        if (clearedRows >= 2) {
+            this.CurrentScore += 100;
+            return;
+        }
+
+        this.CurrentScore += 40;
     }
 }
 
