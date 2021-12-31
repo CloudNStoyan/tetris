@@ -383,6 +383,12 @@ class GameState {
             this.CurrentBlock.Offset.Row = block.Offset.Row;
             this.CurrentBlock.Offset.Column = block.Offset.Column;
 
+            if (!this.BlockFits()) {
+                this.CurrentBlock = block;
+                this.CurrentHoldBlock.Reset();
+                return;
+            }
+
             this.CurrentHoldBlock = block;
             this.CurrentHoldBlock.Reset();
             return;
