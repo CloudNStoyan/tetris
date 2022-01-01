@@ -377,6 +377,10 @@ class GameState {
 
     HoldBlock() {
         if (this.CurrentHoldBlock) {
+            if (this.CurrentHoldBlock.Id == this.CurrentBlock.Id) {
+                return;
+            }
+
             const block = this.CurrentBlock;
 
             this.CurrentBlock = this.CurrentHoldBlock;
