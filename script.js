@@ -245,3 +245,75 @@ function DrawHoldBlock(block) {
         holdPainter.DrawCell(position.Row, columnOffset + position.Column, ColorScheme[block.Id], true);
     });
 }
+
+const backgroundCanvas = document.querySelector('#background-canvas');
+
+const backgroundBoundaries = {
+    x: 0,
+    y: 0
+}
+
+function ResizeBackgroundCanvasToFitScreen() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    backgroundCanvas.width = width;
+    backgroundCanvas.height = height;
+
+    backgroundBoundaries.x = width;
+    backgroundBoundaries.y = height;
+}
+
+addEventListener('resize', ResizeBackgroundCanvasToFitScreen, false);
+ResizeBackgroundCanvasToFitScreen();
+
+const backgroundPainter = new CanvasPainter('#background-canvas');
+
+class BackgroundBlock {
+    constructor(color, painter, position) {
+        this.Color = color;
+        this.Painter = painter;
+        this.Position = position;
+        this.Speed = randomIntFromInterval(2, 4);
+    }
+
+    Update() {
+        this.Position.y += this.Speed;
+    }
+
+    Draw() {
+        this.Painter.DrawBoxWithBorder(this.Position.x, this.Position.y, 25, 25, this.Color);
+        this.Update();
+    }
+
+    IsInBounds(x, y) {
+        return this.Position.x >= 0 && this.Position.x < x && this.Position.y >= -400 && this.Position.y < y;
+    }
+}
+
+let backgroundBlocks = [];
+
+const maxBackgroundBlocks = 120;
+
+function SpawnNewBlocks(howMany) {
+    for (let i = 0; i < howMany; i++) {
+        const pos = {
+            x: randomIntFromInterval(10, backgroundBoundaries.x - 10),
+            y: randomIntFromInterval(-300, -100)
+        };
+
+        backgroundBlocks.push(new BackgroundBlock(ColorScheme[randomIntFromInterval(0, 7)], backgroundPainter, pos));
+    }
+}
+
+function DrawBackgroundFrame() {
+    backgroundPainter.Fill('#f1f1f1')
+    backgroundBlocks = backgroundBlocks.filter(block => block.IsInBounds(backgroundBoundaries.x, backgroundBoundaries.y));
+
+    SpawnNewBlocks(maxBackgroundBlocks - backgroundBlocks.length);
+
+    backgroundBlocks.forEach(block => block.Draw());
+    requestAnimationFrame(DrawBackgroundFrame)
+}
+
+requestAnimationFrame(DrawBackgroundFrame);
