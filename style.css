@@ -6,47 +6,15 @@ main {
     margin: 0 auto;
     display: flex;
     flex-flow: row nowrap;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid lightgray;
 }
 
 .container {
     display: flex;
     flex-flow: row nowrap;
     background-color: #6a6a6a;
-    filter: drop-shadow(2px 4px 6px black);
-}
-
-.container.animate {
-    animation: dancing-shadows 10s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite alternate;
-}
-
-@keyframes dancing-shadows {
-    0% {
-        filter: drop-shadow(1px 0 15px cyan);
-    }
-
-    15% {
-        filter: drop-shadow(0 1px 15px blue);
-    }
-
-    30% {
-        filter: drop-shadow(-1px 0 15px orange);
-    }
-
-    45% {
-        filter: drop-shadow(0 1px 15px yellow);
-    }
-
-    60% {
-        filter: drop-shadow(1px 0 15px lightgreen);
-    }
-
-    75% {
-        filter: drop-shadow(0 1px 15px purple);
-    }
-
-    90% {
-        filter: drop-shadow(-1px 0 15px red);
-    }
 }
 
 .game-container {
@@ -222,21 +190,18 @@ kbd {
 }
 
 .instructions {
+    background-color: gray;
     margin: 0 auto;
     width: 230px;
     text-align: center;
     overflow: hidden;
     transition: width 0.25s linear, padding 0.25s linear;
     white-space: nowrap;
-    height: fit-content;
-    height: -moz-fit-content;
     padding: 10px 20px;
-    background-color: #c1c1c1;
     color: white;
-    border: 0;
-    border-bottom-left-radius: 6px;
-    border-top-left-radius: 6px;
-    filter: drop-shadow(2px 4px 6px black);
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
 }
 
 .instructions h2 {
@@ -285,4 +250,35 @@ kbd {
     width: 100%;
     height: 100%;
     z-index: -1;
+}
+
+.bg-toggle-wrapper {
+    background-color: white;
+    width: fit-content;
+    width: -moz-fit-content;
+    margin: 0 auto;
+    padding: 5px 10px;
+    border-radius: 6px;
+    box-shadow: 0 0.125rem 0.25rem rgb(0 0 0 / 8%);
+    color: #333;
+    font-weight: 600;
+    transition: opacity 0.25s linear;
+    margin-top: 5px;
+}
+
+.bg-toggle-wrapper input:active {
+    outline: none;
+}
+
+.bg-toggle-wrapper * {
+    cursor: pointer;
+    user-select: none;
+}
+
+.ui.hide .bg-toggle-wrapper:hover {
+    opacity: 1;
+}
+
+.ui.hide .bg-toggle-wrapper {
+    opacity: 0;
 }

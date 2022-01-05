@@ -31,7 +31,6 @@ function initGameState() {
     holdContainer.classList.add('show');
     postGameScoreLabel.classList.add('hide');
     instructionsWrapper.classList.add('hide');
-    container.classList.add('animate');
     uiContainer.classList.add('hide');
 
     gameState.BlockQueue.OnNewBlock = () => {
@@ -48,7 +47,6 @@ function initGameState() {
         postGameScore.innerText = gameState.CurrentScore.toString().padStart(6, '0');
         postGameScoreLabel.classList.remove('hide');
         instructionsWrapper.classList.remove('hide');
-        container.classList.remove('animate');
 
         if (uiPlayBtn.innerText == 'Play') {
             uiPlayBtn.innerText = 'Play Again';
@@ -253,7 +251,12 @@ const backgroundBoundaries = {
     y: 0
 }
 
+let isBackgroundEnabled = true;
 function ResizeBackgroundCanvasToFitScreen() {
+    if (!isBackgroundEnabled) {
+        return;
+    }
+
     const width = window.innerWidth;
     const height = window.innerHeight;
 
@@ -306,7 +309,12 @@ function SpawnNewBlocks(howMany) {
     }
 }
 
+
 function DrawBackgroundFrame() {
+    if (!isBackgroundEnabled) {
+        return;
+    }
+
     backgroundPainter.Fill('#f1f1f1')
     backgroundBlocks = backgroundBlocks.filter(block => block.IsInBounds(backgroundBoundaries.x, backgroundBoundaries.y));
 
@@ -317,3 +325,21 @@ function DrawBackgroundFrame() {
 }
 
 requestAnimationFrame(DrawBackgroundFrame);
+
+const toggleBackgroundCheckbox = document.querySelector('.stop-background-toggle');
+
+toggleBackgroundCheckbox.addEventListener('change', (e) => changeBackgroundState(e.target.checked));
+
+function changeBackgroundState(isEnabled) {
+    if (isBackgroundEnabled == isEnabled) {
+        return;
+    }
+
+    if (!isEnabled) {
+        isBackgroundEnabled = false;
+        return;
+    }
+
+    isBackgroundEnabled = true;
+    requestAnimationFrame(DrawBackgroundFrame);
+}
