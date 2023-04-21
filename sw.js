@@ -1,6 +1,6 @@
 self.addEventListener('install', async () => {
     const cache = await caches.open("tetris-appshell");
-    cache.addAll([
+    await cache.addAll([
         "/tetris/",
         "/tetris/index.html",
         "/tetris/Core.js",
