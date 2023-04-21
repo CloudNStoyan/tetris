@@ -6,6 +6,9 @@ self.addEventListener('install', async () => {
         "/tetris/Core.js",
         "/tetris/CanvasPainter.js",
         "/tetris/script.js",
-        "/tetris/style.css"
+        "/tetris/style.css",
+        "/tetris/app.webmanifest.json",
+        "/tetris/icon.png",
+        "/tetris/mask_icon.png"
     ])
 })
