@@ -1,0 +1,23 @@
+{
+    "name": "Tetris",
+    "short_name": "Tetris",
+    "theme_color": "#808080",
+    "display": "standalone",
+    "background_color": "#f1f1f1",
+    "start_url": "/tetris/",
+    "id": "/tetris/",
+    "description": "Tetris game",
+    "icons": [
+        {
+            "src": "icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },       
+        {
+            "src": "mask_icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

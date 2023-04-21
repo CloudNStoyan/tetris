@@ -7,6 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Tetris</title>
     <link href="style.css" rel="stylesheet" />
+    <link rel="icon" href="icon.png"/>
+    <meta name="theme-color" content="#808080"/>
 </head>
 
 <body>
@@ -91,6 +93,11 @@
         </div>
         <canvas id="background-canvas"></canvas>
     </main>
+    <script>
+        if (navigator.serviceWorker) {
+            navigator.serviceWorker.register('/tetris/sw.js', {scope: '/tetris/'})
+        }
+    </script>
     <script src="Core.js"></script>
     <script src="CanvasPainter.js"></script>
     <script src="script.js"></script>
